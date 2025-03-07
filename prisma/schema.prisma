@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DATA_TYPE {
+  MOVIE
+  TV_SHOW
+}
+
+model DATA {
+  id          String    @id
+  title       String
+  cover       String
+  image       String
+  description String
+  type        DATA_TYPE
+  releaseDate DateTime
+  rating      Float
+  episode     Episode[]
+}
+
+model Episode {
+  id        String      @id
+  title     String
+  number    Int
+  season    Int
+  dataId    String
+  data      DATA        @relation(fields: [dataId], references: [id])
+  sources   Sources[]
+  Subtitles Subtitles[]
+}
+
+model Sources {
+  id        String  @id @default(uuid())
+  episodeId String
+  episode   Episode @relation(fields: [episodeId], references: [id])
+  url       String
+  quality   String
+}
+
+model Subtitles {
+  id        String  @id @default(uuid())
+  episodeId String
+  episode   Episode @relation(fields: [episodeId], references: [id])
+  url       String
+  language  String
+}
