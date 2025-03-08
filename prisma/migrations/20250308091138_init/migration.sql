@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Episode" ALTER COLUMN "number" DROP NOT NULL,
+ALTER COLUMN "season" DROP NOT NULL;

@@ -6,6 +6,7 @@ export type ResponseData = {
   cover: string;
   rating: number;
   releaseDate: string;
+  type: string;
 };
 
 export type EpisodeData = {

@@ -1,5 +1,4 @@
 import axios from "axios";
-import dotenv from "dotenv";
 import axiosRetry from "axios-retry";
 import {
   checkEpisodeExists,
@@ -7,22 +6,21 @@ import {
   populateEpisodes,
   populateSources,
   populateSubtitles,
-} from "./modules";
+} from "./modules/index";
 
-dotenv.config();
 axiosRetry(axios, {
   retries: 50,
   retryDelay: (retryCount) => {
     return 1000;
   },
   onRetry: (retryCount, error, requestConfig) => {
-    console.log(
+    console.error(
       `Retry attempt #${retryCount} for request: ${requestConfig.url}`
     );
   },
 });
 
-const getEpisodes = async (dataJson: any) => {
+export const getEpisodes = async (dataJson: any) => {
   for (let i = 0; i < dataJson.episodes.length; i++) {
     console.log(
       `Fetching data for ${dataJson.episodes[i].id} -> ${i + 1} / ${
@@ -30,7 +28,7 @@ const getEpisodes = async (dataJson: any) => {
       }`
     );
     try {
-      let response = await axios.get(
+      let { data } = await axios.get(
         `${process.env.consumetURL}/movies/flixhq/watch?episodeId=${dataJson.episodes[i].id}&mediaId=${dataJson.id}`
       );
 
@@ -38,31 +36,29 @@ const getEpisodes = async (dataJson: any) => {
 
       const status = await checkEpisodeExists(dataJson.episodes[i].id);
       if (status) {
-        populateSources(response.data.sources, dataJson.episodes[i].id);
-        populateSubtitles(response.data.subtitles, dataJson.episodes[i].id);
+        populateSources(data.sources, dataJson.episodes[i].id);
+        populateSubtitles(data.subtitles, dataJson.episodes[i].id);
       } else {
-        console.log(
+        console.error(
           `Resources for episode ${dataJson.episodes[i].id} could not be populated`
         );
       }
-
-      console.log("Created episode with id: " + dataJson.episodes[i].id);
     } catch (error) {
       console.error(error);
     }
   }
 };
 
-const getInfo = async (id: string) => {
+export const getInfo = async (id: string) => {
   try {
-    let response = await axios.get(
+    let { data } = await axios.get(
       `${process.env.consumetURL}/movies/flixhq/info?id=${id}`
     );
-    populateData(response.data);
-    getEpisodes(response.data);
+    populateData(data);
+    getEpisodes(data);
   } catch (error) {
     console.error(error);
   }
 };
 
-getInfo("tv/watch-desperate-housewives-39247");
+// getInfo("movie/watch-fight-club-19651");

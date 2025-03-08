@@ -1,6 +1,5 @@
-import prisma from "../db";
+import prisma from "./db";
 import { ResponseData, EpisodeData, SourceData, SubtitleData } from "./types";
-import { saveLog } from "./log";
 
 export const checkEpisodeExists = async (
   episodeId: string
@@ -18,7 +17,7 @@ export const checkEpisodeExists = async (
     if (episode) {
       return true;
     }
-    console.log(`Episode ${episodeId} not found, retrying in 3 seconds...`);
+    console.error(`Episode ${episodeId} not found, retrying in 3 seconds...`);
     attempts++;
     await delay(3000);
   }
@@ -35,7 +34,7 @@ export const populateData = async (response: ResponseData) => {
         description: response.description,
         image: response.image,
         cover: response.cover,
-        type: "TV_SHOW",
+        type: response.type === "Movie" ? "MOVIE" : "TV_SHOW",
         rating: response.rating,
         releaseDate: new Date(response.releaseDate),
       },
