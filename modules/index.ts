@@ -1,5 +1,30 @@
 import prisma from "../db";
 import { ResponseData, EpisodeData, SourceData, SubtitleData } from "./types";
+import { saveLog } from "./log";
+
+export const checkEpisodeExists = async (
+  episodeId: string
+): Promise<boolean> => {
+  let attempts = 0;
+  const maxAttempts = 10;
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  while (attempts < maxAttempts) {
+    const episode = await prisma.episode.findUnique({
+      where: { id: episodeId },
+    });
+
+    if (episode) {
+      return true;
+    }
+    console.log(`Episode ${episodeId} not found, retrying in 3 seconds...`);
+    attempts++;
+    await delay(3000);
+  }
+
+  return false;
+};
 
 export const populateData = async (response: ResponseData) => {
   try {
